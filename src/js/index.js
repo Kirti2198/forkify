@@ -28,18 +28,23 @@ const controlSearch = async () =>{
            searchView.clearInput();
            searchView.clearResults();
            renderLoader(elements.searchResults);
-
-           // 4) searh for recipes
-           /*so we want the rendering of the results only to happen after we actually receive the results from the API, 
-           so await this promise simply use await here*/
-           //  this returns a promise because getResults() is an async method and async method always returns a promise
+         try{
+            // 4) searh for recipes
+            /*so we want the rendering of the results only to happen after we actually receive the results from the API, 
+            so await this promise simply use await here*/
+            //  this returns a promise because getResults() is an async method and async method always returns a promise
            await state.search.getResults();
 
-           // 5) Render results on UI
-             clearLoader();
+            // 5) Render results on UI
+            clearLoader();
 
-        //   from model console.log(state.search.result);
-           searchView.renderResults(state.search.result);
+            //  from model console.log(state.search.result);
+            searchView.renderResults(state.search.result);
+         }
+         catch(err){
+            alert("Something wrong with the search");
+            clearLoader();
+         }                 
      }
 }
 elements.searchForm.addEventListener('submit', e=>{
@@ -63,9 +68,38 @@ elements.searchResultPages.addEventListener('click',e => {
 /**
  * RECIPE CONTROLLER
  */
-const r = new Recipe(47746);
-r.getRecipe();
-console.log(r);
+// for only testing
+// const r = new Recipe(47746);
+// r.getRecipe();
+// console.log(r);
+
+const controlRecipe = async () => {
+    // get id from URL
+    const id= window.location.hash.replace('#','');
+    console.log(id);
+    if(id){
+        // prepare UI for changes
+        // Create new Recipe Object
+        state.recipe =new Recipe(id);
+        try{
+           // get the new recipe data
+         await state.recipe.getRecipe();
+         // calculate serving and time
+         state.recipe.calcTime();
+         state.recipe.calcServings();
+         // Render Recipe
+         console.log(state.recipe);
+        }
+        catch(err){
+            alert("error processing recipe");
+        }   
+    }
+}
+
+// window.addEventListener('hashchange', controlRecipe);
+// so that after bookmark when the users search the recipe should be there
+// window.addEventListener('load', controlRecipe);
+['hashchange', 'load'].forEach(event => window.addEventListener(event,controlRecipe));
 
 
 
